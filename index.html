@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="세이프체크: 로봇 작업구역 안전수칙을 근거 조항과 함께 알려주는 Q&A 시제품">
+<meta name="description" content="세이프체크: 로봇 작업구역 안전수칙을 법령 조문 그대로 알려주는 Q&A 시제품">
 <meta name="theme-color" content="#1f2a44">
 <title>세이프체크</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f5b301'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%231b1f27' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -27,6 +27,7 @@
     --chip-on: #1f2a44;
     --chip-on-text: #ffffff;
     --radius: 14px;
+    --side-w: 280px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -84,6 +85,12 @@
   }
   .brand h1 { font-size: 20px; margin: 0; letter-spacing: -0.3px; }
   .brand p { margin: 0; font-size: 12.5px; opacity: .8; }
+  .history-toggle {
+    margin-left: auto; flex: none;
+    background: rgba(255,255,255,.12); color: var(--brand-text);
+    border: 1px solid rgba(255,255,255,.25); border-radius: 999px;
+    padding: 6px 12px; font-size: 13.5px; font-weight: 700; min-height: 36px;
+  }
   nav.tabs { display: flex; gap: 4px; margin-top: 12px; }
   nav.tabs button {
     flex: 1; background: transparent; border: 0; color: var(--brand-text);
@@ -93,6 +100,37 @@
   nav.tabs button[aria-selected="true"] { opacity: 1; border-bottom-color: var(--accent); }
 
   main { max-width: 720px; margin: 0 auto; padding: 14px 16px 120px; }
+
+  /* 공지사항 */
+  .announce {
+    width: 100%; display: flex; align-items: center; gap: 8px; text-align: left;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 12px; margin-bottom: 10px; font-size: 14px; color: var(--text);
+  }
+  .announce .tag { flex: none; background: var(--brand); color: var(--brand-text); font-size: 12px; font-weight: 800; border-radius: 6px; padding: 2px 7px; }
+  :root[data-theme="dark"] .announce .tag { background: var(--accent); color: #1b1f27; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .announce .tag { background: var(--accent); color: #1b1f27; } }
+  .announce .title { flex: 1; min-width: 0; font-weight: 700; }
+  .announce .date { flex: none; color: var(--muted); font-size: 12.5px; }
+  .announce .new { flex: none; background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 7px; }
+  .announce .arrow { flex: none; color: var(--muted); }
+  @media (max-width: 480px) { .announce .date { display: none; } }
+  dialog.notice-dialog {
+    border: 0; padding: 0; border-radius: 16px; width: calc(100% - 32px); max-width: 580px;
+    background: var(--surface); color: var(--text); box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  }
+  dialog.notice-dialog::backdrop { background: rgba(10,14,22,.5); }
+  .dlg-head { display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .dlg-head h2 { margin: 0; font-size: 17px; flex: 1; }
+  .dlg-close { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; min-height: 34px; font-size: 14px; }
+  .dlg-body { padding: 6px 16px 16px; max-height: 70vh; overflow-y: auto; }
+  .release { padding: 10px 0; border-bottom: 1px dashed var(--line); }
+  .release:last-child { border-bottom: 0; }
+  .release h3 { margin: 4px 0 6px; font-size: 15px; }
+  .release h3 small { color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .release ul { margin: 0; padding-left: 18px; font-size: 14px; }
+  .release li { margin: 3px 0; }
+
   .notice {
     background: var(--accent-soft); color: var(--accent-text);
     border-radius: 10px; padding: 9px 12px; font-size: 13px; margin-bottom: 14px;
@@ -116,6 +154,48 @@
   }
   .example::before { content: "예) "; color: var(--muted); }
 
+  /* 질문 기록 (왼쪽) */
+  aside.history {
+    position: fixed; top: 0; left: 0; bottom: 0; width: var(--side-w); z-index: 30;
+    background: var(--surface); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column;
+    transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility .2s;
+  }
+  aside.history.open { transform: none; visibility: visible; box-shadow: 0 0 40px rgba(0,0,0,.3); }
+  .scrim { position: fixed; inset: 0; background: rgba(10,14,22,.45); z-index: 29; }
+  .hist-head { display: flex; align-items: center; gap: 8px; padding: 16px 14px 10px; border-bottom: 1px solid var(--line); }
+  .hist-head h2 { margin: 0; font-size: 16px; flex: 1; }
+  .hist-count { color: var(--muted); font-size: 13px; font-weight: 500; }
+  .hist-clear, .hist-close {
+    border: 1px solid var(--line); background: var(--surface); border-radius: 999px;
+    padding: 4px 10px; font-size: 13px; min-height: 32px;
+  }
+  .hist-clear { color: var(--danger); }
+  .hist-clear:disabled { opacity: .4; cursor: default; }
+  .hist-help { margin: 8px 14px 4px; font-size: 12.5px; color: var(--muted); }
+  ul.hist-list { list-style: none; margin: 0; padding: 6px 8px 16px; overflow-y: auto; flex: 1; display: grid; gap: 4px; align-content: start; }
+  ul.hist-list li { display: flex; align-items: stretch; gap: 2px; border-radius: 10px; }
+  ul.hist-list li:hover { background: var(--chip); }
+  .hist-q {
+    flex: 1; min-width: 0; text-align: left; background: transparent; border: 0;
+    padding: 8px 8px; border-radius: 10px; font-size: 14px; line-height: 1.4;
+  }
+  .hist-q .q-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hist-q .q-meta { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .hist-del {
+    flex: none; width: 34px; background: transparent; border: 0; border-radius: 10px;
+    color: var(--muted); font-size: 18px; line-height: 1;
+  }
+  .hist-del:hover { color: var(--danger); background: var(--danger-soft); }
+  .hist-empty { color: var(--muted); font-size: 13.5px; padding: 14px; text-align: center; }
+
+  @media (min-width: 1024px) {
+    aside.history { transform: none; visibility: visible; box-shadow: none; z-index: 11; }
+    .scrim, .history-toggle, .hist-close { display: none !important; }
+    body { padding-left: var(--side-w); }
+    .composer { left: var(--side-w) !important; }
+  }
+
   /* 대화 영역 */
   #thread { display: grid; gap: 12px; margin-top: 4px; }
   .q-bubble {
@@ -130,8 +210,6 @@
   .answer { border-left: 5px solid var(--accent); }
   .answer.ok { border-left-color: var(--ok); }
   .conclusion { font-size: 17px; font-weight: 800; margin: 0 0 8px; line-height: 1.45; }
-  .steps { margin: 0 0 10px; padding-left: 20px; }
-  .steps li { margin: 3px 0; }
   .emergency {
     background: var(--danger-soft); color: var(--danger);
     border: 1px solid var(--danger); border-radius: 12px;
@@ -140,13 +218,22 @@
   .emergency small { display: block; font-weight: 500; }
   .evidence {
     background: var(--bg); border: 1px solid var(--line);
-    border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 14px;
+    border-radius: 12px; padding: 10px 12px; margin-top: 8px; font-size: 14.5px;
   }
-  .evidence h3 { margin: 0 0 4px; font-size: 14.5px; }
+  .evidence h3 { margin: 0 0 4px; font-size: 15px; }
   .meta { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--muted); font-size: 12.5px; margin-bottom: 6px; }
-  .quote { margin: 6px 0 0; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); }
-  .quote-label { font-size: 12px; color: var(--muted); }
-  .evidence a { color: inherit; font-size: 12.5px; }
+  .quote-label { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-top: 6px; }
+  ol.rule-items { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; }
+  ol.rule-items > li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .ho { display: inline-block; font-size: 12px; font-weight: 800; color: var(--ok); background: var(--ok-soft); border-radius: 6px; padding: 1px 6px; margin-right: 4px; }
+  ol.rule-items ul { margin: 4px 0 0; padding-left: 4px; list-style: none; }
+  ol.rule-items ul li { margin: 2px 0; }
+  .proviso { margin-top: 8px; padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); font-size: 14px; }
+  .proviso b { color: var(--muted); font-size: 12.5px; display: block; }
+  details.fulltext { margin-top: 8px; }
+  details.fulltext summary { cursor: pointer; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .quote { margin: 6px 0 0; padding-left: 10px; border-left: 3px solid var(--line); color: var(--text); white-space: pre-line; font-size: 13.5px; }
+  .evidence a { color: inherit; font-size: 12.5px; display: inline-block; margin-top: 6px; }
   .badge {
     display: inline-block; font-size: 12px; font-weight: 800; border-radius: 6px;
     padding: 2px 7px; vertical-align: 1px;
@@ -212,6 +299,18 @@
 </head>
 <body>
 
+<!-- 질문 기록 (왼쪽 사이드바) -->
+<aside class="history" id="history" aria-label="질문 기록">
+  <div class="hist-head">
+    <h2>질문 기록 <span class="hist-count" id="hist-count"></span></h2>
+    <button type="button" class="hist-clear" id="hist-clear">전체 삭제</button>
+    <button type="button" class="hist-close" id="hist-close" aria-label="질문 기록 닫기">닫기</button>
+  </div>
+  <p class="hist-help">질문을 누르면 그때 선택한 구역·작업으로 바로 다시 질문합니다.</p>
+  <ul class="hist-list" id="hist-list"></ul>
+</aside>
+<div class="scrim hidden" id="scrim"></div>
+
 <header class="top">
   <div class="top-inner">
     <div class="brand">
@@ -220,6 +319,7 @@
         <h1>세이프체크</h1>
         <p>로봇 작업구역 안전수칙 Q&amp;A · 시제품</p>
       </div>
+      <button type="button" class="history-toggle" id="hist-open" aria-controls="history">질문 기록</button>
     </div>
     <nav class="tabs" role="tablist" aria-label="화면 선택">
       <button role="tab" id="tab-qa" aria-selected="true" aria-controls="view-qa">질문하기</button>
@@ -229,8 +329,17 @@
 </header>
 
 <main>
+  <!-- 공지사항 -->
+  <button type="button" class="announce" id="announce" aria-haspopup="dialog">
+    <span class="tag">공지</span>
+    <span class="title" id="announce-title"></span>
+    <span class="new hidden" id="announce-new">NEW</span>
+    <span class="date" id="announce-date"></span>
+    <span class="arrow" aria-hidden="true">›</span>
+  </button>
+
   <div class="notice">
-    시제품입니다. 답변은 <b>등록된 문서(산업안전보건기준에 관한 규칙 제222~224조 요지)</b> 기준이며, 현장 자체 수칙은 아직 반영되지 않았습니다. 최종 판단은 현장 안전관리자에게 확인하세요.
+    시제품입니다. 답변은 <b>등록된 규정(산업안전보건기준에 관한 규칙 제222~224조) 조문</b>을 그대로 보여주며, 앱이 안전 여부를 스스로 판단하지 않습니다. 규정에 없는 내용은 "확인 필요"로 표시합니다. 현장 적용은 안전관리자에게 확인하세요.
   </div>
 
   <!-- F1: 근거 기반 안전수칙 Q&A -->
@@ -258,7 +367,7 @@
     </div>
     <ul class="checklist" id="checklist"></ul>
     <div class="all-done" id="all-done">모든 항목을 확인했습니다. 작업 전 안전관리자에게 최종 확인을 받으세요.</div>
-    <p class="ck-note"><span class="badge need">확인 필요</span> 항목은 기업 자체 기준이 아직 없어 값을 정하지 않았습니다. 현장 안전관리자에게 직접 확인하세요.</p>
+    <p class="ck-note"><span class="badge law">근거</span> 항목은 조문 내용 그대로입니다. <span class="badge need">확인 필요</span> 항목은 규정에 기준이 없어 앱이 값을 정하지 않았습니다. 현장 안전관리자에게 직접 확인하세요.</p>
   </section>
 
   <footer>
@@ -275,19 +384,59 @@
       <textarea id="q" rows="1" placeholder="질문을 입력하세요" maxlength="300"></textarea>
       <button class="send" type="submit">전송</button>
     </form>
-    <small>이 답변은 등록된 문서 기준입니다. 문서에 없는 내용은 추측하지 않습니다.</small>
+    <small>규정 조문 그대로 답합니다. 규정에 없는 내용은 추측하거나 판단하지 않습니다.</small>
   </div>
 </div>
+
+<!-- 공지사항 상세 (변경 내용) -->
+<dialog class="notice-dialog" id="notice-dialog" aria-labelledby="notice-dialog-title">
+  <div class="dlg-head">
+    <h2 id="notice-dialog-title">공지사항 · 변경 내용</h2>
+    <button type="button" class="dlg-close" id="notice-close">닫기</button>
+  </div>
+  <div class="dlg-body" id="notice-body"></div>
+</dialog>
 
 <script>
 (function () {
   "use strict";
 
-  // ───────────────── 등록 문서 (근거 데이터) ─────────────────
-  // 법령 요지는 기획서 1-5, 3-2 표를 따름. 원문 전체가 아닌 요지임.
-  var LAW_URL = "https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029039517";
+  // ───────────────── 공지사항 (변경 내역) ─────────────────
+  var RELEASES = [
+    {
+      ver: "1.2",
+      date: "2026-11-26",
+      title: "규정 조문 그대로 답변 + 질문 기록 기능 추가",
+      items: [
+        "답변 방식 변경: 앱이 스스로 만든 안전 조언 문구를 없애고, 산업안전보건기준에 관한 규칙 제222~224조의 각 호 내용과 단서(예외)를 조문 그대로 보여줍니다.",
+        "답변마다 \"조문 원문 전체 보기\"와 해당 조문의 국가법령정보센터 링크를 추가했습니다.",
+        "체크리스트의 근거 항목을 조문 내용 그대로 정리하고, 근거 없이 앱이 만든 수칙 문구(예: \"울타리 안쪽에 들어가지 않기\", \"AMR 앞을 가로지르지 않기\")를 삭제하거나 \"확인 필요\"로 바꿨습니다.",
+        "사고·비상 관련 질문: 앱이 대응 절차를 정하지 않고, 현장 비상 절차와 안전관리자 안내만 표시합니다.",
+        "제224조 조문 제목을 원문대로 \"수리 등 작업 시의 조치 등\"으로 정정했습니다.",
+        "왼쪽에 질문 기록을 추가했습니다. 질문을 누르면 그때의 구역·작업 선택으로 바로 다시 질문합니다.",
+        "질문 기록 개별 삭제(×)와 전체 삭제 버튼을 추가했습니다. 기록은 이 브라우저에만 저장됩니다.",
+        "상단 공지사항을 추가했습니다. 누르면 변경 내용을 볼 수 있습니다."
+      ]
+    },
+    {
+      ver: "1.1",
+      date: "2026-11-26",
+      title: "오류 수정",
+      items: [
+        "\"안전화\" 질문이 \"전화\"(비상 연락처) 질문으로 잘못 인식되던 오류를 수정했습니다.",
+        "\"은(는)\" 대신 받침에 맞는 조사가 자동으로 붙도록 했습니다.",
+        "모바일에서 입력창 안내 문구가 잘리고 스크롤바가 보이던 문제를 수정했습니다.",
+        "브라우저 탭 아이콘(파비콘)이 없어 생기던 오류를 수정했습니다."
+      ]
+    }
+  ];
+
+  // ───────────────── 등록 규정 (근거 데이터) ─────────────────
+  // 출처: 국가법령정보센터, 산업안전보건기준에 관한 규칙 [시행 2026. 3. 2.] [고용노동부령 제450호, 2025. 9. 1., 일부개정]
+  // 아래 조문 문장은 원문 그대로이며, 앱이 내용을 더하거나 판단하지 않는다.
   var LAW_DOC = "산업안전보건기준에 관한 규칙";
   var LAW_DATE = "시행 2026-03-02";
+  var LAW_BASE = "https://www.law.go.kr/법령/산업안전보건기준에관한규칙/";
 
   var ZONES = [
     { id: "cell", name: "로봇 셀" },
@@ -301,54 +450,64 @@
     { id: "pass", name: "이송 동선 통과" }
   ];
 
-  // 근거가 있는 답변
   var KB = [
     {
       id: "a224",
-      article: "제224조 (수리 등 작업 시의 조치)",
-      keywords: { "청소": 3, "급유": 3, "기름": 2, "수리": 3, "검사": 3, "점검": 3, "정비": 3, "보수": 2, "교체": 2, "고장": 1, "닦": 2, "잠금": 2, "잠그": 2, "열쇠": 2, "기동스위치": 1, "loto": 3, "작동범위": 1, "들어가": 1 },
+      no: "제224조",
+      article: "제224조(수리 등 작업 시의 조치 등)",
+      keywords: { "청소": 3, "급유": 3, "기름": 2, "수리": 3, "검사": 3, "점검": 3, "정비": 3, "보수": 2, "교체": 2, "조정": 2, "고장": 1, "닦": 2, "잠금": 2, "잠그": 2, "열쇠": 2, "표지판": 2, "기동스위치": 1, "loto": 3, "작동범위": 1, "들어가": 1, "확인작업": 2 },
       boostTask: "maint",
-      conclusion: "먼저 로봇 운전을 정지하고, 기동스위치를 열쇠로 잠근 뒤 작업해야 합니다.",
-      steps: [
-        "로봇의 운전을 정지합니다.",
-        "기동스위치를 열쇠로 잠그고, 열쇠는 작업하는 사람이 별도로 관리합니다.",
-        "또는 기동스위치에 \"작업 중\" 표지판을 붙여 다른 사람이 조작하지 못하게 합니다."
+      conclusion: "제224조에 따라, 로봇의 작동범위에서 수리·검사·조정·청소·급유 또는 결과에 대한 확인작업을 하는 경우에는 로봇의 운전을 정지하고, 다른 사람이 기동스위치를 조작할 수 없도록 필요한 조치를 해야 합니다.",
+      items: [
+        { no: "적용", text: "로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우" },
+        { no: "조치", text: "해당 로봇의 운전을 정지함과 동시에 그 작업을 하고 있는 동안 로봇의 기동스위치를 열쇠로 잠근 후 열쇠를 별도 관리하거나 해당 로봇의 기동스위치에 작업 중이란 내용의 표지판을 부착하는 등 해당 작업에 종사하고 있는 근로자가 아닌 사람이 해당 기동스위치를 조작할 수 없도록 필요한 조치를 하여야 한다." }
       ],
-      summary: "로봇 작동범위에서 수리·검사·조정·청소·급유 등의 작업을 할 때는 운전을 정지하고, 기동스위치를 열쇠로 잠가 열쇠를 별도 관리하거나 \"작업 중\" 표지판을 설치해야 한다.",
-      gaps: ["현장별 잠금·표지(LOTO) 절차와 열쇠 관리 담당자는 기업 자체 기준이 필요합니다."]
+      proviso: "다만, 로봇의 운전 중에 작업을 하지 아니하면 안되는 경우로서 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      full: "제224조(수리 등 작업 시의 조치 등) 사업주는 로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 해당 로봇의 운전을 정지함과 동시에 그 작업을 하고 있는 동안 로봇의 기동스위치를 열쇠로 잠근 후 열쇠를 별도 관리하거나 해당 로봇의 기동스위치에 작업 중이란 내용의 표지판을 부착하는 등 해당 작업에 종사하고 있는 근로자가 아닌 사람이 해당 기동스위치를 조작할 수 없도록 필요한 조치를 하여야 한다. 다만, 로봇의 운전 중에 작업을 하지 아니하면 안되는 경우로서 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      gaps: ["현장별 잠금·표지(LOTO) 세부 절차와 열쇠 관리 담당자는 조문에 정해져 있지 않습니다.", "단서(예외)에 해당하는지는 앱이 판단하지 않습니다."]
     },
     {
       id: "a222",
-      article: "제222조 (교시 등)",
-      keywords: { "교시": 4, "티칭": 4, "teach": 4, "teaching": 4, "펜던트": 3, "가르치": 2, "이상": 2, "오작동": 2, "이상하": 2, "재가동": 3, "다시켜": 2, "재시작": 3, "지침": 2, "작업중표시": 2 },
+      no: "제222조",
+      article: "제222조(교시 등)",
+      keywords: { "교시": 4, "티칭": 4, "teach": 4, "teaching": 4, "펜던트": 3, "가르치": 2, "매니퓰레이터": 3, "속도설정": 2, "위치설정": 2, "이상": 2, "오작동": 2, "오조작": 2, "이상하": 2, "재가동": 3, "다시켜": 2, "재시작": 3, "지침": 2, "신호": 2, "작업중표시": 2 },
       boostTask: "teach",
-      conclusion: "교시 작업 중 이상이 보이면 즉시 로봇 운전을 정지해야 합니다.",
-      steps: [
-        "작업 전에 정해 둔 교시 작업 지침(조작 방법·순서, 신호 방법, 이상 시 조치 등)을 따릅니다.",
-        "이상을 발견하면 즉시 로봇의 운전을 정지합니다.",
-        "작업 중에는 기동스위치에 \"작업 중\" 표시를 해 다른 사람이 조작하지 못하게 합니다.",
-        "재가동은 사전에 정한 지침에 따라서만 합니다."
+      conclusion: "제222조에 따라, 로봇의 작동범위에서 교시 등의 작업을 하는 경우에는 아래 제1호~제3호의 조치를 해야 합니다.",
+      items: [
+        { no: "제1호", text: "다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것", sub: [
+          "가. 로봇의 조작방법 및 순서",
+          "나. 작업 중의 매니퓰레이터의 속도",
+          "다. 2명 이상의 근로자에게 작업을 시킬 경우의 신호방법",
+          "라. 이상을 발견한 경우의 조치",
+          "마. 이상을 발견하여 로봇의 운전을 정지시킨 후 이를 재가동시킬 경우의 조치",
+          "바. 그 밖에 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 필요한 조치"
+        ] },
+        { no: "제2호", text: "작업에 종사하고 있는 근로자 또는 그 근로자를 감시하는 사람은 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치를 할 것" },
+        { no: "제3호", text: "작업을 하고 있는 동안 로봇의 기동스위치 등에 작업 중이라는 표시를 하는 등 작업에 종사하고 있는 근로자가 아닌 사람이 그 스위치 등을 조작할 수 없도록 필요한 조치를 할 것" }
       ],
-      summary: "로봇 작동범위에서 교시 등의 작업을 할 때는 미리 작업 지침을 정하고, 이상 시 즉시 운전을 정지할 수 있게 하며, 기동스위치에 \"작업 중\" 표시를 하는 등 다른 사람의 조작을 막는 조치를 해야 한다.",
-      gaps: ["설비별 교시 작업 지침서와 재가동 절차는 기업 자체 문서가 필요합니다."]
+      proviso: "다만, 로봇의 구동원을 차단하고 작업을 하는 경우에는 제2호와 제3호의 조치를 하지 아니할 수 있다.",
+      full: "제222조(교시 등) 사업주는 산업용 로봇(이하 “로봇”이라 한다)의 작동범위에서 해당 로봇에 대하여 교시(敎示) 등[매니퓰레이터(manipulator)의 작동순서, 위치ㆍ속도의 설정ㆍ변경 또는 그 결과를 확인하는 것을 말한다. 이하 같다]의 작업을 하는 경우에는 해당 로봇의 예기치 못한 작동 또는 오(誤)조작에 의한 위험을 방지하기 위하여 다음 각 호의 조치를 하여야 한다. 다만, 로봇의 구동원을 차단하고 작업을 하는 경우에는 제2호와 제3호의 조치를 하지 아니할 수 있다. <개정 2016. 4. 7.>\n1. 다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것\n가. 로봇의 조작방법 및 순서\n나. 작업 중의 매니퓰레이터의 속도\n다. 2명 이상의 근로자에게 작업을 시킬 경우의 신호방법\n라. 이상을 발견한 경우의 조치\n마. 이상을 발견하여 로봇의 운전을 정지시킨 후 이를 재가동시킬 경우의 조치\n바. 그 밖에 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 필요한 조치\n2. 작업에 종사하고 있는 근로자 또는 그 근로자를 감시하는 사람은 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치를 할 것\n3. 작업을 하고 있는 동안 로봇의 기동스위치 등에 작업 중이라는 표시를 하는 등 작업에 종사하고 있는 근로자가 아닌 사람이 그 스위치 등을 조작할 수 없도록 필요한 조치를 할 것",
+      gaps: ["제1호의 지침에 들어갈 구체적인 내용(설비별 교시 작업 지침서)은 조문에 정해져 있지 않습니다."]
     },
     {
       id: "a223",
-      article: "제223조 (운전 중 위험 방지)",
-      keywords: { "울타리": 4, "펜스": 4, "fence": 4, "높이": 2, "1.8": 3, "방호": 3, "안전매트": 4, "매트": 2, "광전자": 4, "라이트커튼": 4, "감응": 3, "센서": 1, "운전중": 2, "가동중": 2, "돌아가": 2, "움직이": 1, "접근": 2, "가까이": 2 },
+      no: "제223조",
+      article: "제223조(운전 중 위험 방지)",
+      keywords: { "울타리": 4, "펜스": 4, "fence": 4, "높이": 2, "1.8": 3, "방호": 3, "안전매트": 4, "매트": 2, "광전자": 4, "라이트커튼": 4, "감응": 3, "센서": 1, "운전중": 2, "가동중": 2, "돌아가": 2, "움직이": 1, "접근": 2, "가까이": 2, "부딪": 2 },
       boostTask: "run",
-      conclusion: "로봇 운전 중 위험 구역에는 높이 1.8m 이상의 울타리를 설치해야 합니다.",
-      steps: [
-        "원칙: 로봇 운전 중 위험이 있는 곳에는 높이 1.8m 이상의 울타리를 설치합니다.",
-        "울타리를 설치할 수 없는 구간에는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치합니다.",
-        "운전 중에는 울타리·방호장치 안쪽(작동범위)에 들어가지 않습니다."
+      conclusion: "제223조에 따라, 로봇의 운전으로 인한 부상 등의 위험을 방지하기 위해 높이 1.8미터 이상의 울타리를 설치해야 하며, 울타리를 설치할 수 없는 일부 구간에는 감응형 방호장치를 설치해야 합니다.",
+      items: [
+        { no: "적용", text: "로봇의 운전(제222조에 따른 교시 등을 위한 로봇의 운전과 제224조 단서에 따른 로봇의 운전은 제외한다)으로 인하여 근로자에게 발생할 수 있는 부상 등의 위험을 방지하기 위하여" },
+        { no: "울타리", text: "높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)를 설치해야 하며," },
+        { no: "방호장치", text: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다." }
       ],
-      summary: "로봇 운전 중 근로자가 로봇에 부딪칠 위험이 있을 때는 높이 1.8m 이상의 울타리를 설치하고, 울타리를 설치할 수 없는 일부 구간에는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다. (예외 조건 있음)",
-      gaps: ["예외 조건 적용 여부는 현장 안전관리자가 판단합니다."]
+      proviso: "다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다.",
+      full: "제223조(운전 중 위험 방지) 사업주는 로봇의 운전(제222조에 따른 교시 등을 위한 로봇의 운전과 제224조 단서에 따른 로봇의 운전은 제외한다)으로 인하여 근로자에게 발생할 수 있는 부상 등의 위험을 방지하기 위하여 높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)를 설치해야 하며, 컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다. 다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다. <개정 2016. 4. 7., 2018. 8. 14., 2022. 10. 18., 2024. 6. 28.>",
+      gaps: ["단서(예외)에 해당하는지, 울타리 높이를 낮출 수 있는지는 앱이 판단하지 않습니다."]
     }
   ];
 
-  // 근거가 없는 질문 → 추측하지 않고 "확인 필요"
+  // 규정에 근거가 없는 질문 → 추측·판단하지 않고 "확인 필요"
   var UNKNOWN = [
     {
       id: "u-amr",
@@ -356,64 +515,61 @@
       boostZone: "amr",
       boostTask: "pass",
       topic: "AMR·AGV 운행구역의 안전거리·속도·통행 규칙",
-      reason: "등록된 문서에 AMR·AGV 운행구역의 안전거리, 운행 속도, 통행 규칙 값이 없습니다. (제222~224조는 산업용 로봇 작업 기준이며 AMR 적용 범위는 확인되지 않았습니다.)"
+      reason: "등록된 규정에 AMR·AGV 운행구역의 안전거리, 운행 속도, 통행 규칙이 없습니다. (제222~224조는 산업용 로봇에 관한 조문이며, AMR·AGV에 적용되는지는 앱이 판단하지 않습니다.)"
     },
     {
       id: "u-edu",
       keywords: { "교육": 3, "처음": 2, "신규": 3, "신입": 3, "출입": 2, "허가": 2, "자격": 3, "협력사": 2 },
       topic: "구역 출입 절차와 필요한 교육",
-      reason: "등록된 문서에 구역별 출입 절차, 필수 교육, 자격 기준이 없습니다."
+      reason: "등록된 규정에 구역별 출입 절차, 필수 교육, 자격 기준이 없습니다."
     },
     {
       id: "u-contact",
       keywords: { "연락처": 3, "전화": 3, "번호": 2, "누구": 2, "담당자": 2, "관리자": 1 },
       ignore: ["안전화"], // "안전화" 안의 "전화"가 연락처 질문으로 잘못 잡히지 않게
       topic: "비상 연락처와 담당자",
-      reason: "등록된 문서에 비상 연락처와 구역별 담당자 정보가 없습니다."
+      reason: "등록된 규정에 비상 연락처와 구역별 담당자 정보가 없습니다."
     },
     {
       id: "u-ppe",
       keywords: { "보호구": 3, "안전화": 3, "안전모": 3, "헬멧": 3, "장갑": 3, "보안경": 3, "조끼": 2, "복장": 3 },
       topic: "구역별 보호구 착용 기준",
-      reason: "등록된 문서에 구역별 보호구 착용 기준이 없습니다."
+      reason: "등록된 규정에 구역별 보호구 착용 기준이 없습니다."
     }
   ];
 
-  // 위험 징후·비상 상황 키워드 → 먼저 정지·호출 안내
+  // 사고·비상 관련 단어 → 앱은 대응 절차를 판단하지 않고 현장 절차·안전관리자 안내만 표시
   var EMERGENCY = ["사고", "다쳤", "다친", "부상", "끼었", "끼임", "끼여", "깔렸", "비상", "화재", "불이", "불났", "연기", "폭발", "충돌", "부딪혔", "쓰러", "피가", "출혈", "감전", "안멈", "멈추지않", "폭주", "타는냄새", "응급"];
 
-  // 체크리스트 데이터 (F2)
+  // 체크리스트 데이터 (F2): 근거 항목은 조문 문구 그대로, 그 외는 "확인 필요"
   function law(no) { return { type: "law", text: LAW_DOC + " " + no + " · " + LAW_DATE }; }
-  var NEED = { type: "need", text: "기업 자체 기준 미수령" };
+  var NEED = { type: "need", text: "규정에 기준 없음 · 현장 확인" };
 
   var COMMON_BEFORE = [
-    { t: "이 구역 출입 절차와 필요한 교육을 마쳤는지 확인", s: NEED },
+    { t: "이 구역 출입 절차와 필요한 교육 확인", s: NEED },
     { t: "비상정지 버튼 위치와 비상 연락처 확인", s: NEED }
   ];
 
   var CHECK = {
     "cell|run": [
-      { t: "로봇 주변 울타리(높이 1.8m 이상)가 설치·유지되어 있는지 확인", s: law("제223조") },
-      { t: "울타리가 없는 구간의 안전매트·광전자식 방호장치가 작동하는지 확인", s: law("제223조") },
-      { t: "운전 중에는 울타리·방호장치 안쪽(작동범위)에 들어가지 않기", s: law("제223조") }
+      { t: "높이 1.8미터 이상의 울타리 설치 (로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있음)", s: law("제223조") },
+      { t: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간: 안전매트 또는 광전자식 방호장치 등 감응형 방호장치 설치", s: law("제223조") }
     ],
     "cell|teach": [
-      { t: "교시 작업 지침(조작 방법·순서, 신호 방법, 이상 시 조치)이 정해져 있는지 확인", s: law("제222조") },
-      { t: "이상 발견 시 즉시 운전을 정지할 수 있는지 확인", s: law("제222조") },
-      { t: "기동스위치에 \"작업 중\" 표시를 해 다른 사람의 조작 막기", s: law("제222조") },
-      { t: "재가동은 사전에 정한 지침에 따라서만 하기", s: law("제222조") }
+      { t: "지침을 정하고 그 지침에 따라 작업: 로봇의 조작방법 및 순서 / 작업 중의 매니퓰레이터의 속도 / 2명 이상 작업 시 신호방법 / 이상을 발견한 경우의 조치 / 운전 정지 후 재가동시킬 경우의 조치 / 그 밖에 필요한 조치", s: law("제222조 제1호") },
+      { t: "작업에 종사하는 근로자 또는 감시하는 사람은 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치", s: law("제222조 제2호") },
+      { t: "작업하는 동안 로봇의 기동스위치 등에 작업 중이라는 표시를 하는 등 다른 사람이 스위치 등을 조작할 수 없도록 필요한 조치", s: law("제222조 제3호") }
     ],
     "cell|maint": [
-      { t: "로봇 운전 정지", s: law("제224조") },
-      { t: "기동스위치를 열쇠로 잠그고 열쇠는 작업자가 별도 관리 (또는 \"작업 중\" 표지판 부착)", s: law("제224조") },
+      { t: "해당 로봇의 운전 정지", s: law("제224조") },
+      { t: "작업하는 동안 기동스위치를 열쇠로 잠근 후 열쇠를 별도 관리하거나, 기동스위치에 작업 중이란 내용의 표지판을 부착하는 등 다른 사람이 기동스위치를 조작할 수 없도록 필요한 조치", s: law("제224조") },
       { t: "현장 잠금·표지(LOTO) 세부 절차 확인", s: NEED }
     ],
     "cell|pass": [
-      { t: "로봇이 운전 중이면 울타리·방호장치 안쪽으로 지나가지 않기", s: law("제223조") },
-      { t: "로봇 셀 주변 보행 통로 위치 확인", s: NEED }
+      { t: "로봇 셀 주변 보행 통로와 통행 기준 확인", s: NEED }
     ],
     "amr|run": [
-      { t: "AMR·AGV 운행 경로와 보행자 통로 구분 확인", s: NEED },
+      { t: "AMR·AGV 운행 경로와 보행자 통로 구분 기준 확인", s: NEED },
       { t: "AMR·AGV 운행 속도와 안전거리 기준 확인", s: NEED }
     ],
     "amr|teach": [
@@ -425,7 +581,7 @@
     ],
     "amr|pass": [
       { t: "AMR·AGV 통로 횡단 지점과 안전거리 기준 확인", s: NEED },
-      { t: "주행 중인 AMR·AGV 앞을 가로지르지 않기 (세부 기준은 현장 확인)", s: NEED }
+      { t: "AMR·AGV 주행 중 보행자 통행 기준 확인", s: NEED }
     ]
   };
   function getChecklist(zone, task) {
@@ -472,9 +628,12 @@
     for (var k in entry.keywords) if (text.indexOf(k) !== -1) s += entry.keywords[k];
     return s;
   }
+  function lawUrl(no) { return LAW_BASE + no; }
 
   // ───────────────── 칩 선택 ─────────────────
-  function renderChips(group, list) {
+  var CHIP_LISTS = { zone: ZONES, task: TASKS, czone: ZONES, ctask: TASKS };
+  function renderChips(group) {
+    var list = CHIP_LISTS[group];
     var box = document.querySelector('[data-group="' + group + '"]');
     box.innerHTML = list.map(function (it) {
       return '<button type="button" class="chip" data-id="' + it.id + '" aria-pressed="' + (state[group] === it.id) + '">' + esc(it.name) + "</button>";
@@ -483,12 +642,12 @@
       var b = e.target.closest(".chip");
       if (!b) return;
       state[group] = b.getAttribute("data-id");
-      renderChips(group, list);
+      renderChips(group);
       if (group === "czone" || group === "ctask") renderChecklist();
     };
   }
 
-  // ───────────────── F1: 답변 만들기 ─────────────────
+  // ───────────────── F1: 답변 만들기 (키워드 → 조문 매칭만 수행) ─────────────────
   function answer(question) {
     var text = norm(question);
     var isEmergency = EMERGENCY.some(function (k) { return text.indexOf(k) !== -1; });
@@ -505,13 +664,26 @@
     }).filter(function (x) { return x.base >= 2 || (x.base > 0 && x.s >= 3); })
       .sort(function (a, b) { return b.s - a.s; });
 
-    // 키워드가 하나도 없으면 선택한 상황만으로는 답하지 않음 (추측 방지)
+    // 질문에 조문 키워드가 없으면 선택한 상황만으로는 답하지 않음 (추측 방지)
     var top = kbScored[0];
     var hits = kbScored.filter(function (x) { return x.base >= 2 && x.s >= top.s - 1; }).slice(0, 2);
-    // AMR 구역 질문인데 법령 키워드가 약하면 법령 답 대신 확인 필요 우선
+    // AMR 구역 질문인데 조문 키워드가 약하면 조문 대신 "확인 필요" (산업용 로봇 조문의 AMR 적용 여부는 판단하지 않음)
     if (state.zone === "amr" && unScored.length && hits.length && hits[0].base < 3) hits = [];
 
     return { emergency: isEmergency, hits: hits.map(function (x) { return x.e; }), unknowns: unScored.map(function (x) { return x.e; }) };
+  }
+
+  function renderEvidence(h) {
+    var items = h.items.map(function (it) {
+      var sub = it.sub ? "<ul>" + it.sub.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul>" : "";
+      return '<li><span class="ho">' + esc(it.no) + "</span>" + esc(it.text) + sub + "</li>";
+    }).join("");
+    return '<div class="evidence"><h3><span class="badge law">근거</span> ' + esc(h.article) + "</h3>" +
+      '<div class="meta"><span>문서: ' + esc(LAW_DOC) + "</span><span>기준일: " + esc(LAW_DATE) + "</span></div>" +
+      '<div class="quote-label">규정 내용 (조문 그대로)</div><ol class="rule-items">' + items + "</ol>" +
+      (h.proviso ? '<div class="proviso"><b>단서(예외) · 조문 그대로</b>' + esc(h.proviso) + "</div>" : "") +
+      '<details class="fulltext"><summary>조문 원문 전체 보기</summary><p class="quote">' + esc(h.full) + "</p></details>" +
+      '<a href="' + esc(lawUrl(h.no)) + '" target="_blank" rel="noopener">국가법령정보센터에서 ' + esc(h.no) + " 보기 ↗</a></div>";
   }
 
   function renderAnswer(question, res) {
@@ -522,20 +694,13 @@
     html += '<article class="card answer' + (ok ? " ok" : "") + '">';
 
     if (res.emergency) {
-      html += '<div class="emergency" role="alert">⚠ 위험 상황이면 지금 바로: 로봇(설비) 운전 정지 → 안전관리자 호출' +
-        "<small>부상자가 있으면 119에 신고하세요. 아래 내용은 그다음에 확인하세요.</small></div>";
+      html += '<div class="emergency" role="alert">사고·비상 상황은 이 앱이 판단하지 않습니다. 현장 비상 절차에 따라 즉시 안전관리자에게 알리세요.' +
+        "<small>부상자가 있으면 119에 신고하세요. 아래 조문 안내는 그다음에 확인하세요.</small></div>";
     }
 
     if (ok) {
-      var main = res.hits[0];
-      html += '<p class="conclusion">' + esc(main.conclusion) + "</p>";
-      html += '<ol class="steps">' + main.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>";
-      res.hits.forEach(function (h) {
-        html += '<div class="evidence"><h3><span class="badge law">근거</span> ' + esc(h.article) + "</h3>" +
-          '<div class="meta"><span>문서: ' + esc(LAW_DOC) + "</span><span>기준일: " + esc(LAW_DATE) + "</span></div>" +
-          '<div class="quote-label">조문 요지 (원문 아님)</div><p class="quote">' + esc(h.summary) + "</p>" +
-          '<a href="' + LAW_URL + '" target="_blank" rel="noopener">원문 보기 (국가법령정보센터) ↗</a></div>';
-      });
+      html += '<p class="conclusion">' + esc(res.hits[0].conclusion) + "</p>";
+      res.hits.forEach(function (h) { html += renderEvidence(h); });
       var gaps = [];
       res.hits.forEach(function (h) { gaps = gaps.concat(h.gaps); });
       res.unknowns.forEach(function (u) { gaps.push(u.reason); });
@@ -546,14 +711,14 @@
       }
     } else {
       var u = res.unknowns[0];
-      html += '<p class="conclusion">' + (u ? esc(u.topic) + topicJosa(u.topic) + " 등록된 문서에 근거가 없어 답할 수 없습니다." : "등록된 문서에서 이 질문의 근거를 찾지 못했습니다.") + "</p>";
+      html += '<p class="conclusion">' + (u ? esc(u.topic) + topicJosa(u.topic) + " 등록된 규정에 근거가 없어 답할 수 없습니다." : "등록된 규정에서 이 질문에 해당하는 조문을 찾지 못했습니다.") + "</p>";
       html += '<div class="need-box"><span class="badge need">확인 필요</span>';
       if (res.unknowns.length) {
         res.unknowns.forEach(function (x) { html += "<p>" + esc(x.reason) + "</p>"; });
       } else {
-        html += "<p>추측해서 답하지 않습니다. 질문에 작업 내용(예: 청소, 교시, 울타리)을 넣어 다시 물어보거나, 현장 안전관리자에게 문의하세요.</p>";
+        html += "<p>앱은 규정에 없는 내용을 추측하거나 판단하지 않습니다. 질문에 작업 내용(예: 청소, 교시, 울타리)을 넣어 다시 물어보거나, 현장 안전관리자에게 문의하세요.</p>";
       }
-      html += "<p><b>값을 지어내지 않습니다. 현장 안전관리자에게 문의하세요.</b></p></div>";
+      html += "<p><b>현장 안전관리자에게 문의하세요.</b></p></div>";
     }
 
     html += '<div class="feedback"><span>도움이 됐나요?</span>' +
@@ -592,9 +757,80 @@
   function ask(question) {
     question = question.trim();
     if (!question) return;
+    addHistory(question);
     renderAnswer(question, answer(question));
   }
 
+  // ───────────────── 질문 기록 (왼쪽) ─────────────────
+  var HIST_KEY = "safecheck:history";
+  var HIST_MAX = 50;
+  function getHistory() { var h = store.get(HIST_KEY); return Array.isArray(h) ? h : []; }
+  function saveHistory(list) { store.set(HIST_KEY, list); renderHistory(); }
+  function addHistory(q) {
+    var list = getHistory().filter(function (h) { return !(h.q === q && h.zone === state.zone && h.task === state.task); });
+    list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), q: q, zone: state.zone, task: state.task, t: Date.now() });
+    saveHistory(list.slice(0, HIST_MAX));
+  }
+  function fmtTime(t) {
+    var d = new Date(t);
+    function p(n) { return (n < 10 ? "0" : "") + n; }
+    return (d.getMonth() + 1) + "." + d.getDate() + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+  function renderHistory() {
+    var list = getHistory();
+    var ul = document.getElementById("hist-list");
+    document.getElementById("hist-count").textContent = list.length ? "(" + list.length + ")" : "";
+    document.getElementById("hist-clear").disabled = !list.length;
+    document.getElementById("hist-open").textContent = "질문 기록" + (list.length ? " " + list.length : "");
+    if (!list.length) {
+      ul.innerHTML = '<li class="hist-empty">아직 질문한 내용이 없습니다.</li>';
+      return;
+    }
+    ul.innerHTML = list.map(function (h) {
+      var ctx = nameOf(ZONES, h.zone) + " · " + nameOf(TASKS, h.task);
+      return '<li><button type="button" class="hist-q" data-hid="' + esc(h.id) + '" title="이 질문 다시 하기">' +
+        '<span class="q-text">' + esc(h.q) + '</span><span class="q-meta">' + esc(ctx) + " · " + esc(fmtTime(h.t)) + "</span></button>" +
+        '<button type="button" class="hist-del" data-del="' + esc(h.id) + '" aria-label="이 질문 기록 삭제" title="삭제">×</button></li>';
+    }).join("");
+  }
+  document.getElementById("hist-list").addEventListener("click", function (e) {
+    var del = e.target.closest("[data-del]");
+    if (del) {
+      var id = del.getAttribute("data-del");
+      saveHistory(getHistory().filter(function (h) { return h.id !== id; }));
+      return;
+    }
+    var item = e.target.closest("[data-hid]");
+    if (item) {
+      var hid = item.getAttribute("data-hid");
+      var h = getHistory().filter(function (x) { return x.id === hid; })[0];
+      if (!h) return;
+      // 그때 선택했던 구역·작업으로 되돌린 뒤 바로 다시 질문
+      state.zone = h.zone; state.task = h.task;
+      renderChips("zone"); renderChips("task");
+      showTab("qa");
+      closeHistory();
+      ask(h.q);
+    }
+  });
+  document.getElementById("hist-clear").addEventListener("click", function () {
+    if (!getHistory().length) return;
+    if (window.confirm("질문 기록을 모두 삭제할까요?")) saveHistory([]);
+  });
+  function openHistory() {
+    document.getElementById("history").classList.add("open");
+    document.getElementById("scrim").classList.remove("hidden");
+  }
+  function closeHistory() {
+    document.getElementById("history").classList.remove("open");
+    document.getElementById("scrim").classList.add("hidden");
+  }
+  document.getElementById("hist-open").addEventListener("click", openHistory);
+  document.getElementById("hist-close").addEventListener("click", closeHistory);
+  document.getElementById("scrim").addEventListener("click", closeHistory);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeHistory(); });
+
+  // ───────────────── 입력창 ─────────────────
   var form = document.getElementById("ask-form");
   var qInput = document.getElementById("q");
   form.addEventListener("submit", function (e) {
@@ -666,16 +902,38 @@
     document.getElementById("view-qa").classList.toggle("hidden", !qa);
     document.getElementById("view-check").classList.toggle("hidden", qa);
     document.getElementById("composer").classList.toggle("hidden", !qa);
-    if (!qa) { state.czone = state.zone; state.ctask = state.task; renderChips("czone", ZONES); renderChips("ctask", TASKS); renderChecklist(); }
+    if (!qa) { state.czone = state.zone; state.ctask = state.task; renderChips("czone"); renderChips("ctask"); renderChecklist(); }
   }
   document.getElementById("tab-qa").addEventListener("click", function () { showTab("qa"); });
   document.getElementById("tab-check").addEventListener("click", function () { showTab("check"); });
 
-  renderChips("zone", ZONES);
-  renderChips("task", TASKS);
-  renderChips("czone", ZONES);
-  renderChips("ctask", TASKS);
+  // ───────────────── 공지사항 ─────────────────
+  var NOTICE_KEY = "safecheck:notice-seen";
+  var latest = RELEASES[0];
+  document.getElementById("announce-title").textContent = "업데이트 v" + latest.ver + " · " + latest.title;
+  document.getElementById("announce-date").textContent = latest.date;
+  if (store.get(NOTICE_KEY) !== latest.ver) document.getElementById("announce-new").classList.remove("hidden");
+  document.getElementById("notice-body").innerHTML = RELEASES.map(function (r) {
+    return '<section class="release"><h3>v' + esc(r.ver) + " · " + esc(r.title) + "<small>" + esc(r.date) + "</small></h3><ul>" +
+      r.items.map(function (it) { return "<li>" + esc(it) + "</li>"; }).join("") + "</ul></section>";
+  }).join("");
+  var dlg = document.getElementById("notice-dialog");
+  document.getElementById("announce").addEventListener("click", function () {
+    store.set(NOTICE_KEY, latest.ver);
+    document.getElementById("announce-new").classList.add("hidden");
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+  });
+  document.getElementById("notice-close").addEventListener("click", function () {
+    if (dlg.close) dlg.close(); else dlg.removeAttribute("open");
+  });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg && dlg.close) dlg.close(); });
+
+  renderChips("zone");
+  renderChips("task");
+  renderChips("czone");
+  renderChips("ctask");
   renderChecklist();
+  renderHistory();
 })();
 </script>
 </body>
