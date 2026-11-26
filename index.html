@@ -122,6 +122,7 @@
   .quiz-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
   .quiz-actions .btn-primary { margin-left: auto; }
   .score-big { font-size: 34px; font-weight: 900; margin: 2px 0 4px; }
+  .chip:disabled { opacity: .4; cursor: not-allowed; }
   .review { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
   .review li { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; background: var(--surface); }
   .review .mark { font-weight: 900; margin-right: 6px; }
@@ -443,6 +444,18 @@
 
   // ───────────────── 공지사항 (변경 내역) ─────────────────
   var RELEASES = [
+    {
+      ver: "1.7",
+      date: "2026-11-26",
+      title: "퀴즈 문제 수 선택 (5·10·20·30·50문제)",
+      items: [
+        "안전 확인 퀴즈를 5문제, 10문제, 20문제, 30문제, 50문제 중에서 골라 풀 수 있습니다.",
+        "문제를 17개에서 54개로 늘렸습니다. (제222조 21개, 제223조 16개, 제224조 17개, 모두 조문 문구 그대로)",
+        "조문별 범위를 고르면 그 범위의 문제 수만큼만 고를 수 있습니다. (예: 제223조는 10문제까지)",
+        "문제가 많을 때는 \"여기까지 채점하기\"로 푼 문제까지만 채점할 수 있습니다.",
+        "최고 기록을 범위·문제 수별로 따로 저장합니다."
+      ]
+    },
     {
       ver: "1.6",
       date: "2026-11-26",
@@ -1084,7 +1097,146 @@
       ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
     { art: "a223", type: "ox", q: "고용노동부장관이 해당 로봇의 안전기준이 한국산업표준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 제223조 본문에 따른 조치를 하지 않을 수 있다.", answer: 0,
       quote: "다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다.",
-      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" }
+      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" },
+
+    // ── 제222조 추가 문제 ──
+    { art: "a222", type: "ox", q: "제222조는 산업용 로봇의 작동범위에서 해당 로봇에 대하여 교시 등의 작업을 하는 경우에 적용된다.", answer: 0,
+      quote: "사업주는 산업용 로봇(이하 “로봇”이라 한다)의 작동범위에서 해당 로봇에 대하여 교시…의 작업을 하는 경우에는",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "제222조의 조치는 어떤 위험을 방지하기 위한 것인가요?",
+      options: ["해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험", "화재·폭발에 의한 위험", "소음에 의한 위험", "정전기에 의한 위험"], answer: 0,
+      quote: "해당 로봇의 예기치 못한 작동 또는 오(誤)조작에 의한 위험을 방지하기 위하여 다음 각 호의 조치를 하여야 한다.",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "mc", q: "제222조 제1호 가목에 해당하는 지침 사항은?",
+      options: ["로봇의 조작방법 및 순서", "작업 중의 매니퓰레이터의 속도", "이상을 발견한 경우의 조치", "2명 이상의 근로자에게 작업을 시킬 경우의 신호방법"], answer: 0,
+      quote: "가. 로봇의 조작방법 및 순서",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "교시 작업 지침에는 '작업 중의 매니퓰레이터의 ○○'을 정해야 합니다. ○○에 들어갈 말은?",
+      options: ["속도", "무게", "색상", "가격"], answer: 0,
+      quote: "나. 작업 중의 매니퓰레이터의 속도",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "제222조에 따라 교시 작업 지침에 신호방법을 정해야 하는 경우는?",
+      options: ["2명 이상의 근로자에게 작업을 시킬 경우", "야간에 작업을 시킬 경우", "신규 근로자가 작업할 경우", "로봇을 새로 설치한 경우"], answer: 0,
+      quote: "다. 2명 이상의 근로자에게 작업을 시킬 경우의 신호방법",
+      ask: "두 명이 함께 교시할 때 신호방법도 정해야 하나요?" },
+    { art: "a222", type: "ox", q: "제222조 제1호에 따르면 교시 작업 지침에는 '이상을 발견한 경우의 조치'가 들어가야 한다.", answer: 0,
+      quote: "라. 이상을 발견한 경우의 조치",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "ox", q: "제222조 제1호의 지침은 정해 두기만 하면 되고, 그 지침에 따라 작업을 시킬 필요는 없다.", answer: 1,
+      quote: "1. 다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "제222조 제1호 바목의 내용은?",
+      options: ["그 밖에 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 필요한 조치", "로봇의 구매 및 설치 절차", "작업자의 근무 교대 방법", "로봇 제조사의 연락처"], answer: 0,
+      quote: "바. 그 밖에 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 필요한 조치",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "ox", q: "제222조 제2호에 따르면 교시 작업 중 이상을 발견하면 작업을 마친 뒤에 로봇의 운전을 정지하면 된다.", answer: 1,
+      quote: "2. 작업에 종사하고 있는 근로자 또는 그 근로자를 감시하는 사람은 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치를 할 것",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "mc", q: "제222조 제3호에 따라 작업을 하는 동안 로봇의 기동스위치 등에 하는 표시는?",
+      options: ["작업 중이라는 표시", "점검 완료 표시", "사용 금지 날짜 표시", "제조사 표시"], answer: 0,
+      quote: "3. 작업을 하고 있는 동안 로봇의 기동스위치 등에 작업 중이라는 표시를 하는 등 작업에 종사하고 있는 근로자가 아닌 사람이 그 스위치 등을 조작할 수 없도록 필요한 조치를 할 것",
+      ask: "작업 중 표지판은 언제 붙여야 하나요?" },
+    { art: "a222", type: "mc", q: "제222조 제3호의 조치는 누가 스위치 등을 조작할 수 없도록 하기 위한 것인가요?",
+      options: ["작업에 종사하고 있는 근로자가 아닌 사람", "작업에 종사하고 있는 근로자", "그 근로자를 감시하는 사람", "사업주"], answer: 0,
+      quote: "3. 작업을 하고 있는 동안 로봇의 기동스위치 등에 작업 중이라는 표시를 하는 등 작업에 종사하고 있는 근로자가 아닌 사람이 그 스위치 등을 조작할 수 없도록 필요한 조치를 할 것",
+      ask: "작업 중 표지판은 언제 붙여야 하나요?" },
+    { art: "a222", type: "ox", q: "로봇의 구동원을 차단하고 교시 작업을 하는 경우에도 제222조 제1호(지침을 정하고 그에 따라 작업)의 조치는 제외되지 않는다.", answer: 0,
+      quote: "다만, 로봇의 구동원을 차단하고 작업을 하는 경우에는 제2호와 제3호의 조치를 하지 아니할 수 있다.",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "로봇의 구동원을 차단하고 교시 작업을 하는 경우, 제222조에서 하지 아니할 수 있는 조치는?",
+      options: ["제2호와 제3호의 조치", "제1호의 조치", "제1호와 제2호의 조치", "제1호~제3호 모든 조치"], answer: 0,
+      quote: "다만, 로봇의 구동원을 차단하고 작업을 하는 경우에는 제2호와 제3호의 조치를 하지 아니할 수 있다.",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "ox", q: "제222조의 '교시 등'에는 매니퓰레이터의 위치·속도를 설정·변경한 그 결과를 확인하는 것도 포함된다.", answer: 0,
+      quote: "매니퓰레이터(manipulator)의 작동순서, 위치ㆍ속도의 설정ㆍ변경 또는 그 결과를 확인하는 것을 말한다.",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+
+    // ── 제223조 추가 문제 ──
+    { art: "a223", type: "mc", q: "제223조의 울타리 설치는 어떤 위험을 방지하기 위한 것인가요?",
+      options: ["로봇의 운전으로 인하여 근로자에게 발생할 수 있는 부상 등의 위험", "로봇의 도난 위험", "먼지로 인한 설비 고장 위험", "정전으로 인한 생산 중단 위험"], answer: 0,
+      quote: "사업주는 로봇의 운전(…)으로 인하여 근로자에게 발생할 수 있는 부상 등의 위험을 방지하기 위하여 높이 1.8미터 이상의 울타리(…)를 설치해야 하며,",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "ox", q: "제223조에 따르면 울타리 높이는 어떤 경우에도 1.8미터보다 낮게 할 수 없다.", answer: 1,
+      quote: "높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "mc", q: "제223조에서 울타리 높이를 1.8미터 이하로 조절할 수 있는 경우는?",
+      options: ["로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우", "작업장 천장이 낮은 경우", "울타리 설치 비용이 많이 드는 경우", "작업자가 요청한 경우"], answer: 0,
+      quote: "높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "ox", q: "제223조에 따르면 울타리를 설치할 수 없는 일부 구간에는 감응형 방호장치를 설치해야 한다.", answer: 0,
+      quote: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다.",
+      ask: "울타리를 설치할 수 없는 구간은 어떻게 하나요?" },
+    { art: "a223", type: "mc", q: "제223조에서 감응형 방호장치의 예로 든 것은?",
+      options: ["안전매트 또는 광전자식 방호장치", "소화기", "경광등", "CCTV"], answer: 0,
+      quote: "… 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다.",
+      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" },
+    { art: "a223", type: "mc", q: "제223조에서 울타리를 설치할 수 없는 일부 구간이 생기는 경우로 예를 든 것은?",
+      options: ["컨베이어 시스템의 설치 등", "작업장 조명 부족", "작업자 수 부족", "로봇의 색상"], answer: 0,
+      quote: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 …",
+      ask: "울타리를 설치할 수 없는 구간은 어떻게 하나요?" },
+    { art: "a223", type: "ox", q: "제224조 단서에 따른 로봇의 운전은 제223조(운전 중 위험 방지)의 '로봇의 운전'에서 제외된다.", answer: 0,
+      quote: "로봇의 운전(제222조에 따른 교시 등을 위한 로봇의 운전과 제224조 단서에 따른 로봇의 운전은 제외한다)",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "mc", q: "제223조 단서에서 로봇의 안전기준이 부합한다고 인정하는 사람은?",
+      options: ["고용노동부장관", "사업주", "안전관리자", "로봇 제조사"], answer: 0,
+      quote: "다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다.",
+      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" },
+    { art: "a223", type: "mc", q: "제223조 단서에서 로봇의 안전기준이 부합해야 하는 기준으로 든 것은?",
+      options: ["한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준", "회사 내부 안전기준", "작업자 설문 결과", "로봇 판매 가격 기준"], answer: 0,
+      quote: "다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다.",
+      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" },
+    { art: "a223", type: "mc", q: "제223조(운전 중 위험 방지)의 조치를 해야 하는 주체는?",
+      options: ["사업주", "근로자", "고용노동부장관", "로봇 제조사"], answer: 0,
+      quote: "사업주는 로봇의 운전(…)으로 인하여 근로자에게 발생할 수 있는 부상 등의 위험을 방지하기 위하여 …",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "ox", q: "제223조에 따르면 울타리를 설치할 수 없는 구간에는 아무 조치를 하지 않아도 된다.", answer: 1,
+      quote: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다.",
+      ask: "울타리를 설치할 수 없는 구간은 어떻게 하나요?" },
+
+    // ── 제224조 추가 문제 ──
+    { art: "a224", type: "mc", q: "제224조의 조치가 적용되는 장소는?",
+      options: ["로봇의 작동범위", "로봇 보관 창고", "사무실", "로봇 제조 공장"], answer: 0,
+      quote: "사업주는 로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 …",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "ox", q: "제224조에 따르면 로봇의 작동범위에서 '검사' 작업을 할 때도 로봇의 운전을 정지해야 한다.", answer: 0,
+      quote: "로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 해당 로봇의 운전을 정지함과 동시에 …",
+      ask: "로봇을 수리하거나 점검할 때 기동스위치는 어떻게 하나요?" },
+    { art: "a224", type: "ox", q: "제224조에 따르면 로봇의 작동범위에서 '결과에 대한 확인작업'을 할 때는 운전 정지 등의 조치가 필요 없다.", answer: 1,
+      quote: "…청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 해당 로봇의 운전을 정지함과 동시에 …",
+      ask: "로봇을 수리하거나 점검할 때 기동스위치는 어떻게 하나요?" },
+    { art: "a224", type: "mc", q: "제224조에 따라 기동스위치를 열쇠로 잠그는 등의 조치는 언제까지 유지해야 하나요?",
+      options: ["그 작업을 하고 있는 동안", "작업 시작 후 10분 동안", "작업을 시작하기 전까지만", "다음 날 아침까지"], answer: 0,
+      quote: "해당 로봇의 운전을 정지함과 동시에 그 작업을 하고 있는 동안 로봇의 기동스위치를 열쇠로 잠근 후 …",
+      ask: "로봇 정비 중에 기동스위치 열쇠는 어떻게 관리하나요?" },
+    { art: "a224", type: "mc", q: "제224조에서 기동스위치를 조작할 수 없도록 해야 하는 대상은?",
+      options: ["해당 작업에 종사하고 있는 근로자가 아닌 사람", "해당 작업에 종사하고 있는 근로자", "안전관리자", "사업주"], answer: 0,
+      quote: "… 해당 작업에 종사하고 있는 근로자가 아닌 사람이 해당 기동스위치를 조작할 수 없도록 필요한 조치를 하여야 한다.",
+      ask: "작업 중 표지판은 언제 붙여야 하나요?" },
+    { art: "a224", type: "ox", q: "제224조에 따르면 수리 작업 시 로봇의 운전을 정지하기만 하면, 기동스위치에 대한 조치는 하지 않아도 된다.", answer: 1,
+      quote: "해당 로봇의 운전을 정지함과 동시에 그 작업을 하고 있는 동안 로봇의 기동스위치를 열쇠로 잠근 후 열쇠를 별도 관리하거나 …",
+      ask: "로봇을 수리하거나 점검할 때 기동스위치는 어떻게 하나요?" },
+    { art: "a224", type: "mc", q: "제224조 단서가 적용될 수 있는 경우는?",
+      options: ["로봇의 운전 중에 작업을 하지 아니하면 안되는 경우", "작업 시간이 짧은 경우", "작업자가 숙련된 경우", "로봇이 저속 모드인 경우"], answer: 0,
+      quote: "다만, 로봇의 운전 중에 작업을 하지 아니하면 안되는 경우로서 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "ox", q: "제224조 단서는 로봇의 운전 중에 작업을 해야 하는 경우라도 제222조 각 호의 조치를 한 경우에만 적용된다.", answer: 0,
+      quote: "다만, 로봇의 운전 중에 작업을 하지 아니하면 안되는 경우로서 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "mc", q: "제224조 단서에서 제222조 각 호의 조치를 하는 목적은?",
+      options: ["해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여", "작업 시간을 줄이기 위하여", "생산량을 늘리기 위하여", "전력 사용량을 줄이기 위하여"], answer: 0,
+      quote: "… 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "mc", q: "제224조(수리 등 작업 시의 조치 등)에 따라 조치를 해야 하는 주체는?",
+      options: ["사업주", "로봇 제조사", "고용노동부장관", "안전관리자 개인"], answer: 0,
+      quote: "제224조(수리 등 작업 시의 조치 등) 사업주는 로봇의 작동범위에서 …",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "ox", q: "제224조의 적용 대상인 '조정' 작업에서 교시 등에 해당하는 것은 제외된다.", answer: 0,
+      quote: "해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업",
+      ask: "로봇을 수리하거나 점검할 때 기동스위치는 어떻게 하나요?" },
+    { art: "a224", type: "mc", q: "제224조에 따라 기동스위치에 부착하는 표지판의 내용은?",
+      options: ["작업 중이란 내용", "점검 완료라는 내용", "출입 금지 시간", "로봇의 제조 일자"], answer: 0,
+      quote: "… 해당 로봇의 기동스위치에 작업 중이란 내용의 표지판을 부착하는 등 …",
+      ask: "작업 중 표지판은 언제 붙여야 하나요?" }
   ];
   var QUIZ_SCOPES = [
     { id: "all", name: "전체" },
@@ -1093,7 +1245,12 @@
     { id: "a224", name: "제224조 수리 등" }
   ];
   var QUIZ_BEST_KEY = "safecheck:quiz-best";
-  var quiz = { scope: "all", round: [], i: 0, phase: "intro" };
+  var QUIZ_COUNTS = [5, 10, 20, 30, 50];
+  var quiz = { scope: "all", count: 5, round: [], i: 0, phase: "intro", mode: "full", early: false };
+  function scopePool() { return QUIZ.filter(function (q) { return quiz.scope === "all" || q.art === quiz.scope; }); }
+  function maxCount() { var n = scopePool().length, m = QUIZ_COUNTS[0]; QUIZ_COUNTS.forEach(function (c) { if (c <= n) m = c; }); return m; }
+  function bestKey() { return quiz.scope + "|" + quiz.count; }
+  function getBestMap() { var b = store.get(QUIZ_BEST_KEY); return (b && typeof b === "object" && b.c === undefined) ? b : {}; }
 
   function shuffle(a) {
     a = a.slice();
@@ -1116,14 +1273,14 @@
   }
   function buildRound(list) {
     if (list) return shuffle(list).map(function (q) { return makeItem(q); });
-    var pool = QUIZ.filter(function (q) { return quiz.scope === "all" || q.art === quiz.scope; });
+    var pool = scopePool();
     var pri = [];
     if (quiz.scope === "all") {
       var asked = askedArticles();
-      pri = shuffle(pool.filter(function (q) { return asked[q.art]; })).slice(0, 3);
+      pri = shuffle(pool.filter(function (q) { return asked[q.art]; })).slice(0, Math.max(3, Math.round(quiz.count * 0.4)));
     }
     var rest = shuffle(pool.filter(function (q) { return pri.indexOf(q) === -1; }));
-    return shuffle(pri.concat(rest).slice(0, QUIZ_N)).map(function (q) { return makeItem(q); });
+    return shuffle(pri.concat(rest).slice(0, quiz.count)).map(function (q) { return makeItem(q); });
   }
   function optText(item, idx) { return item.q.type === "ox" ? ["O", "X"][idx] : item.q.options[idx]; }
   function quizEl() { return document.getElementById("quiz"); }
@@ -1132,16 +1289,25 @@
     quiz.phase = "intro";
     var asked = askedArticles();
     var askedNames = KB.filter(function (e) { return asked[e.id]; }).map(function (e) { return e.no; });
-    var best = store.get(QUIZ_BEST_KEY);
+    var poolSize = scopePool().length;
+    if (quiz.count > poolSize) quiz.count = maxCount();
+    var best = getBestMap()[bestKey()];
+    var scopeName = QUIZ_SCOPES.filter(function (s) { return s.id === quiz.scope; })[0].name;
     var html = '<div class="card quiz-intro"><h2>안전 확인 퀴즈</h2>' +
       "<p>질문하기에서 쓰는 <b>산업안전보건기준에 관한 규칙 제222~224조</b> 조문으로 만든 문제입니다. 정답과 근거는 모두 조문 문구 그대로이며, 앱이 따로 만든 기준은 없습니다.</p>" +
       '<p class="label">출제 범위</p><div class="chips">' +
       QUIZ_SCOPES.map(function (s) {
         return '<button type="button" class="chip" data-act="scope" data-id="' + s.id + '" aria-pressed="' + (quiz.scope === s.id) + '">' + esc(s.name) + "</button>";
       }).join("") + "</div>" +
+      '<p class="label">문제 수</p><div class="chips">' +
+      QUIZ_COUNTS.map(function (c) {
+        return '<button type="button" class="chip" data-act="count" data-n="' + c + '" aria-pressed="' + (quiz.count === c) + '"' +
+          (c > poolSize ? ' disabled title="이 범위의 문제는 ' + poolSize + '개입니다"' : "") + ">" + c + "문제</button>";
+      }).join("") + "</div>" +
+      (QUIZ_COUNTS.some(function (c) { return c > poolSize; }) ? "<p>이 범위(" + esc(scopeName) + ")에는 문제가 " + poolSize + "개 있어 " + maxCount() + "문제까지 고를 수 있습니다.</p>" : "") +
       (quiz.scope === "all" && askedNames.length ? "<p>질문 기록에 있는 조문(" + esc(askedNames.join(", ")) + ") 문제를 먼저 냅니다.</p>" : "") +
-      (best ? "<p>최고 기록: " + best.n + "문제 중 " + best.c + "문제 정답</p>" : "") +
-      '<div class="quiz-actions"><span class="label" style="margin:0">' + Math.min(QUIZ_N, QUIZ.filter(function (q) { return quiz.scope === "all" || q.art === quiz.scope; }).length) + '문제 · 객관식·O/X</span><button type="button" class="btn-primary" data-act="start">퀴즈 시작</button></div></div>';
+      (best ? "<p>최고 기록 (" + esc(scopeName) + " · " + quiz.count + "문제): " + best.c + "문제 정답</p>" : "") +
+      '<div class="quiz-actions"><span class="label" style="margin:0">' + esc(scopeName) + " · " + quiz.count + '문제 · 객관식·O/X</span><button type="button" class="btn-primary" data-act="start">퀴즈 시작</button></div></div>';
     quizEl().innerHTML = html;
   }
 
@@ -1173,6 +1339,7 @@
     } else {
       html += '<div class="quiz-actions"><button type="button" class="btn-ghost" data-act="home">처음으로</button></div>';
     }
+    if (total > 5) html += '<div class="quiz-actions" style="margin-top:8px"><button type="button" class="btn-ghost" data-act="finish">여기까지 채점하기</button></div>';
     html += "</div>";
     quizEl().innerHTML = html;
   }
@@ -1181,12 +1348,16 @@
     quiz.phase = "result";
     var total = quiz.round.length;
     var correct = quiz.round.filter(function (it) { return it.chosen === it.q.answer; }).length;
-    var best = store.get(QUIZ_BEST_KEY);
-    if (!best || correct / total > best.c / best.n || (correct / total === best.c / best.n && total > best.n)) store.set(QUIZ_BEST_KEY, { c: correct, n: total });
+    // 최고 기록은 범위·문제 수별로, 끝까지 푼 일반 풀이에서만 저장
+    if (quiz.mode === "full" && !quiz.early) {
+      var bm = getBestMap();
+      if (!bm[bestKey()] || correct > bm[bestKey()].c) { bm[bestKey()] = { c: correct, n: total }; store.set(QUIZ_BEST_KEY, bm); }
+    }
     var wrong = total - correct;
     var html = '<div class="card"><p class="label">퀴즈 결과</p>' +
       '<div class="score-big">' + correct + " / " + total + "</div>" +
-      "<p style=\"margin:0;font-size:14px;color:var(--muted)\">" + total + "문제 중 " + correct + "문제 정답" + (wrong ? "" : " · 모두 맞혔습니다.") + "</p>" +
+      "<p style=\"margin:0;font-size:14px;color:var(--muted)\">" + total + "문제 중 " + correct + "문제 정답" + (wrong ? "" : " · 모두 맞혔습니다.") +
+      (quiz.early ? " · 중간에 채점했습니다 (푼 문제만 채점)" : "") + (quiz.mode === "wrong" ? " · 틀린 문제 다시 풀기" : "") + "</p>" +
       '<ul class="review">' + quiz.round.map(function (it, n) {
         var ok = it.chosen === it.q.answer;
         return '<li><span class="mark ' + (ok ? "o" : "x") + '">' + (ok ? "O" : "X") + "</span>" + (n + 1) + ". " + esc(it.q.q) +
@@ -1205,10 +1376,17 @@
     if (!b || b.disabled) return;
     var act = b.getAttribute("data-act");
     if (act === "scope") { quiz.scope = b.getAttribute("data-id"); renderQuizIntro(); }
-    else if (act === "start") { quiz.round = buildRound(); quiz.i = 0; renderQuizQuestion(); quizTop(); }
+    else if (act === "count") { quiz.count = Number(b.getAttribute("data-n")); renderQuizIntro(); }
+    else if (act === "start") { quiz.round = buildRound(); quiz.i = 0; quiz.mode = "full"; quiz.early = false; renderQuizQuestion(); quizTop(); }
     else if (act === "retry-wrong") {
       quiz.round = buildRound(quiz.round.filter(function (it) { return it.chosen !== it.q.answer; }).map(function (it) { return it.q; }));
-      quiz.i = 0; renderQuizQuestion(); quizTop();
+      quiz.i = 0; quiz.mode = "wrong"; quiz.early = false; renderQuizQuestion(); quizTop();
+    }
+    else if (act === "finish") {
+      var answered = quiz.round.filter(function (it) { return it.chosen !== null; });
+      if (!answered.length) { quiz.round = []; renderQuizIntro(); quizTop(); return; }
+      quiz.early = answered.length < quiz.round.length;
+      quiz.round = answered; renderQuizResult(); quizTop();
     }
     else if (act === "opt") { quiz.round[quiz.i].chosen = Number(b.getAttribute("data-idx")); renderQuizQuestion(); }
     else if (act === "next") {
