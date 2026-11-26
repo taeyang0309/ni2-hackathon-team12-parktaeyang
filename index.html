@@ -94,6 +94,40 @@
     border-bottom: 3px solid transparent;
   }
   nav.tabs button[aria-selected="true"] { opacity: 1; border-bottom-color: var(--accent); }
+  @media (max-width: 480px) { nav.tabs button { font-size: 14px; line-height: 1.25; padding: 10px 2px 11px; } }
+
+  /* 퀴즈 */
+  .quiz-intro h2 { margin: 0 0 6px; font-size: 18px; }
+  .quiz-intro p { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+  .btn-primary { border: 0; border-radius: 12px; background: var(--accent); color: #1b1f27; font-weight: 800; padding: 10px 18px; min-height: 44px; font-size: 15px; }
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .quiz-q { font-size: 17px; font-weight: 800; margin: 10px 0 12px; line-height: 1.45; }
+  .opts { display: grid; gap: 8px; }
+  .opt { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 11px 12px; font-size: 15px; display: flex; gap: 10px; align-items: flex-start; }
+  .opt .k { flex: none; width: 24px; height: 24px; border-radius: 999px; background: var(--chip); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
+  .opt:hover:not(:disabled) { border-color: var(--accent); }
+  .opt:disabled { cursor: default; }
+  .opt.correct { border-color: var(--ok); background: var(--ok-soft); }
+  .opt.correct .k { background: var(--ok); color: #fff; }
+  .opt.wrong { border-color: var(--danger); background: var(--danger-soft); }
+  .opt.wrong .k { background: var(--danger); color: #fff; }
+  .opts.ox { grid-template-columns: 1fr 1fr; }
+  .opts.ox .opt { justify-content: center; font-size: 24px; font-weight: 900; padding: 14px; }
+  .opts.ox .opt .k { display: none; }
+  .quiz-fb { margin-top: 12px; border-radius: 12px; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line); background: var(--bg); }
+  .quiz-fb .res { font-weight: 800; font-size: 15.5px; margin: 0 0 4px; }
+  .quiz-fb .res.ok { color: var(--ok); }
+  .quiz-fb .res.no { color: var(--danger); }
+  .quiz-fb a { color: inherit; font-size: 12.5px; display: inline-block; margin-top: 6px; }
+  .quiz-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .quiz-actions .btn-primary { margin-left: auto; }
+  .score-big { font-size: 34px; font-weight: 900; margin: 2px 0 4px; }
+  .review { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 8px; }
+  .review li { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 14px; background: var(--surface); }
+  .review .mark { font-weight: 900; margin-right: 6px; }
+  .review .mark.o { color: var(--ok); }
+  .review .mark.x { color: var(--danger); }
+  .review .ans { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; }
 
   main { max-width: 720px; margin: 0 auto; padding: 14px 16px 120px; }
 
@@ -335,6 +369,7 @@
     <nav class="tabs" role="tablist" aria-label="화면 선택">
       <button role="tab" id="tab-qa" aria-selected="true" aria-controls="view-qa">질문하기</button>
       <button role="tab" id="tab-check" aria-selected="false" aria-controls="view-check">작업 전 체크리스트</button>
+      <button role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">안전 확인 퀴즈</button>
     </nav>
   </div>
 </header>
@@ -370,6 +405,11 @@
     <p class="ck-note"><span class="badge law">근거</span> 항목은 조문 내용 그대로입니다. <span class="badge need">확인 필요</span> 항목은 규정에 기준이 없어 앱이 값을 정하지 않았습니다. 현장 안전관리자에게 직접 확인하세요.</p>
   </section>
 
+  <!-- F3: 안전 확인 퀴즈 (질문하기와 같은 규정 조문으로 출제) -->
+  <section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" class="hidden">
+    <div id="quiz" aria-live="polite"></div>
+  </section>
+
   <footer>
     근거: 산업안전보건기준에 관한 규칙 (시행 2026-03-02, 고용노동부령 제450호) ·
     <a href="https://www.law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&amp;lsJoLnkSeq=1029039517" target="_blank" rel="noopener">국가법령정보센터</a><br>
@@ -403,6 +443,18 @@
 
   // ───────────────── 공지사항 (변경 내역) ─────────────────
   var RELEASES = [
+    {
+      ver: "1.6",
+      date: "2026-11-26",
+      title: "안전 확인 퀴즈 추가",
+      items: [
+        "상단에 \"안전 확인 퀴즈\" 탭을 추가했습니다.",
+        "질문하기와 같은 산업안전보건기준에 관한 규칙 제222~224조 조문으로 만든 17문제 중 5문제를 무작위로 냅니다. (객관식·O/X)",
+        "답을 고르면 바로 정답과 근거 조문(조문 그대로)을 보여주고, \"질문하기에서 자세히 보기\"로 해당 조문 답변으로 이동할 수 있습니다.",
+        "질문 기록에 있는 조문 문제를 먼저 냅니다. 조문별(제222·223·224조)로만 풀 수도 있습니다.",
+        "결과 화면에서 문제별 정답을 다시 보고, \"틀린 문제만 다시\" 풀 수 있습니다. 최고 기록은 이 브라우저에 저장됩니다."
+      ]
+    },
     {
       ver: "1.5",
       date: "2026-11-26",
@@ -966,18 +1018,221 @@
     renderChecklist();
   });
 
-  // ───────────────── 탭 ─────────────────
-  function showTab(which) {
-    var qa = which === "qa";
-    document.getElementById("tab-qa").setAttribute("aria-selected", qa);
-    document.getElementById("tab-check").setAttribute("aria-selected", !qa);
-    document.getElementById("view-qa").classList.toggle("hidden", !qa);
-    document.getElementById("view-check").classList.toggle("hidden", qa);
-    document.getElementById("composer").classList.toggle("hidden", !qa);
-    if (!qa) { state.czone = state.zone; state.ctask = state.task; renderChips("czone"); renderChips("ctask"); renderChecklist(); }
+  // ───────────────── F3: 안전 확인 퀴즈 ─────────────────
+  // 문제·정답·근거는 모두 질문하기에서 쓰는 제222~224조 조문 문구에서 가져옴 (앱이 만든 기준 없음)
+  var QUIZ_N = 5;
+  var QUIZ = [
+    { art: "a224", type: "mc", q: "로봇의 작동범위에서 청소·급유 작업을 할 때, 제224조에 따라 해당 로봇에 해야 하는 조치는?",
+      options: ["로봇의 운전을 정지한다", "로봇의 속도를 낮추고 작업한다", "감시하는 사람을 배치하고 운전을 계속한다", "짧은 작업이면 별도 조치 없이 작업한다"], answer: 0,
+      quote: "사업주는 로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 해당 로봇의 운전을 정지함과 동시에 …",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a224", type: "mc", q: "제224조에 따라 작업하는 동안 로봇의 기동스위치를 열쇠로 잠근 후, 그 열쇠는 어떻게 해야 하나요?",
+      options: ["별도 관리한다", "기동스위치 옆에 걸어 둔다", "누구나 쓸 수 있는 공용함에 둔다", "작업이 끝나면 폐기한다"], answer: 0,
+      quote: "… 그 작업을 하고 있는 동안 로봇의 기동스위치를 열쇠로 잠근 후 열쇠를 별도 관리하거나 …",
+      ask: "로봇 정비 중에 기동스위치 열쇠는 어떻게 관리하나요?" },
+    { art: "a224", type: "ox", q: "제224조에는 기동스위치를 열쇠로 잠그는 방법 외에, 기동스위치에 '작업 중'이란 내용의 표지판을 부착하는 방법도 나와 있다.", answer: 0,
+      quote: "… 열쇠를 별도 관리하거나 해당 로봇의 기동스위치에 작업 중이란 내용의 표지판을 부착하는 등 해당 작업에 종사하고 있는 근로자가 아닌 사람이 해당 기동스위치를 조작할 수 없도록 필요한 조치를 하여야 한다.",
+      ask: "작업 중 표지판은 언제 붙여야 하나요?" },
+    { art: "a224", type: "mc", q: "다음 중 제224조(수리 등 작업 시의 조치 등)의 적용 대상 작업이 아닌 것은?",
+      options: ["수리", "청소·급유", "결과에 대한 확인작업", "교시 등에 해당하는 조정"], answer: 3,
+      quote: "로봇의 작동범위에서 해당 로봇의 수리ㆍ검사ㆍ조정(교시 등에 해당하는 것은 제외한다)ㆍ청소ㆍ급유 또는 결과에 대한 확인작업을 하는 경우에는 …",
+      ask: "로봇을 수리하거나 점검할 때 기동스위치는 어떻게 하나요?" },
+    { art: "a224", type: "mc", q: "제224조 단서: 로봇의 운전 중에 작업을 하지 않으면 안 되는 경우, 어떤 조치를 했을 때 본문의 조치(운전 정지 등)를 하지 않을 수 있나요?",
+      options: ["제222조 각 호의 조치", "제223조의 울타리 설치", "안전관리자의 구두 승인", "작업자 2명 이상 배치"], answer: 0,
+      quote: "다만, 로봇의 운전 중에 작업을 하지 아니하면 안되는 경우로서 해당 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 제222조 각 호의 조치를 한 경우에는 그러하지 아니하다.",
+      ask: "로봇 작동범위 안에서 청소나 급유를 해도 되나요?" },
+    { art: "a222", type: "mc", q: "제222조에서 말하는 '교시 등'에 해당하지 않는 것은?",
+      options: ["매니퓰레이터의 작동순서 설정", "매니퓰레이터의 위치·속도의 설정·변경", "설정·변경한 결과의 확인", "로봇의 급유"], answer: 3,
+      quote: "교시(敎示) 등[매니퓰레이터(manipulator)의 작동순서, 위치ㆍ속도의 설정ㆍ변경 또는 그 결과를 확인하는 것을 말한다. 이하 같다]",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "제222조 제1호에 따라 교시 작업 지침에 정해야 하는 사항이 아닌 것은?",
+      options: ["로봇의 조작방법 및 순서", "작업 중의 매니퓰레이터의 속도", "2명 이상의 근로자에게 작업을 시킬 경우의 신호방법", "로봇 설비의 구매 가격"], answer: 3,
+      quote: "1. 다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것\n가. 로봇의 조작방법 및 순서\n나. 작업 중의 매니퓰레이터의 속도\n다. 2명 이상의 근로자에게 작업을 시킬 경우의 신호방법\n라. 이상을 발견한 경우의 조치\n마. 이상을 발견하여 로봇의 운전을 정지시킨 후 이를 재가동시킬 경우의 조치\n바. 그 밖에 로봇의 예기치 못한 작동 또는 오조작에 의한 위험을 방지하기 위하여 필요한 조치",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "제222조 제2호에 따라, 교시 작업 중 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치를 해야 하는 사람은?",
+      options: ["작업에 종사하고 있는 근로자 또는 그 근로자를 감시하는 사람", "안전관리자만", "사업주만", "로봇 제조사 담당자"], answer: 0,
+      quote: "2. 작업에 종사하고 있는 근로자 또는 그 근로자를 감시하는 사람은 이상을 발견하면 즉시 로봇의 운전을 정지시키기 위한 조치를 할 것",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "ox", q: "로봇의 구동원을 차단하고 교시 작업을 하는 경우에는 제222조 제2호와 제3호의 조치를 하지 아니할 수 있다.", answer: 0,
+      quote: "다만, 로봇의 구동원을 차단하고 작업을 하는 경우에는 제2호와 제3호의 조치를 하지 아니할 수 있다.",
+      ask: "교시 작업 중 이상이 보이면 어떻게 하나요?" },
+    { art: "a222", type: "ox", q: "제222조에 따르면 교시 작업 지침은 작업을 모두 마친 뒤에 정하면 된다.", answer: 1,
+      quote: "1. 다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a222", type: "mc", q: "'이상을 발견하여 로봇의 운전을 정지시킨 후 이를 재가동시킬 경우의 조치'는 제222조에서 어디에 정하도록 되어 있나요?",
+      options: ["제1호의 지침", "제223조의 울타리 기준", "제224조의 표지판", "정해야 하는 곳이 없다"], answer: 0,
+      quote: "1. 다음 각 목의 사항에 관한 지침을 정하고 그 지침에 따라 작업을 시킬 것\n…\n마. 이상을 발견하여 로봇의 운전을 정지시킨 후 이를 재가동시킬 경우의 조치",
+      ask: "로봇을 정지시킨 뒤 재가동할 때 필요한 조치는?" },
+    { art: "a222", type: "mc", q: "제222조(교시 등)에서 각 호의 조치를 해야 하는 주체는 누구로 되어 있나요?",
+      options: ["사업주", "로봇 제조사", "고용노동부장관", "협력업체 담당자"], answer: 0,
+      quote: "제222조(교시 등) 사업주는 산업용 로봇(이하 “로봇”이라 한다)의 작동범위에서 … 다음 각 호의 조치를 하여야 한다.",
+      ask: "교시 작업 전에 정해야 하는 지침은 무엇인가요?" },
+    { art: "a223", type: "mc", q: "제223조에 따라 로봇 운전으로 인한 위험을 방지하기 위해 설치해야 하는 울타리의 높이는?",
+      options: ["1.8미터 이상", "1.2미터 이상", "1.5미터 이상", "높이 기준이 없다"], answer: 0,
+      quote: "… 높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)를 설치해야 하며, …",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "mc", q: "컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에는 제223조에 따라 무엇을 설치해야 하나요?",
+      options: ["안전매트 또는 광전자식 방호장치 등 감응형 방호장치", "바닥 안전선(라인 테이프)", "경고 표지판", "아무것도 설치하지 않아도 된다"], answer: 0,
+      quote: "… 컨베이어 시스템의 설치 등으로 울타리를 설치할 수 없는 일부 구간에 대해서는 안전매트 또는 광전자식 방호장치 등 감응형 방호장치를 설치해야 한다.",
+      ask: "울타리를 설치할 수 없는 구간은 어떻게 하나요?" },
+    { art: "a223", type: "ox", q: "로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 울타리 높이를 1.8미터보다 낮게 조절할 수 있다.", answer: 0,
+      quote: "높이 1.8미터 이상의 울타리(로봇의 가동범위 등을 고려하여 높이로 인한 위험성이 없는 경우에는 높이를 그 이하로 조절할 수 있다)",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "mc", q: "제223조(운전 중 위험 방지)의 '로봇의 운전'에서 제외되는 것은?",
+      options: ["제222조에 따른 교시 등을 위한 로봇의 운전", "야간의 로봇 운전", "저속 모드의 로봇 운전", "하루 1시간 이내의 로봇 운전"], answer: 0,
+      quote: "사업주는 로봇의 운전(제222조에 따른 교시 등을 위한 로봇의 운전과 제224조 단서에 따른 로봇의 운전은 제외한다)으로 인하여 …",
+      ask: "로봇 주변 울타리 높이는 얼마여야 하나요?" },
+    { art: "a223", type: "ox", q: "고용노동부장관이 해당 로봇의 안전기준이 한국산업표준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 제223조 본문에 따른 조치를 하지 않을 수 있다.", answer: 0,
+      quote: "다만, 고용노동부장관이 해당 로봇의 안전기준이 한국산업표준에서 정하고 있는 안전기준 또는 국제적으로 통용되는 안전기준에 부합한다고 인정하는 경우에는 본문에 따른 조치를 하지 않을 수 있다.",
+      ask: "안전매트나 광전자식 방호장치는 언제 설치하나요?" }
+  ];
+  var QUIZ_SCOPES = [
+    { id: "all", name: "전체" },
+    { id: "a222", name: "제222조 교시 등" },
+    { id: "a223", name: "제223조 운전 중" },
+    { id: "a224", name: "제224조 수리 등" }
+  ];
+  var QUIZ_BEST_KEY = "safecheck:quiz-best";
+  var quiz = { scope: "all", round: [], i: 0, phase: "intro" };
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
   }
-  document.getElementById("tab-qa").addEventListener("click", function () { showTab("qa"); });
-  document.getElementById("tab-check").addEventListener("click", function () { showTab("check"); });
+  function kbById(id) { for (var i = 0; i < KB.length; i++) if (KB[i].id === id) return KB[i]; return null; }
+  // 질문 기록에서 어떤 조문을 물었는지 (같은 키워드 매칭 기준)
+  function askedArticles() {
+    var set = {};
+    getHistory().forEach(function (h) {
+      var t = norm(h.q);
+      KB.forEach(function (e) { if (score(e, t) >= 2) set[e.id] = true; });
+    });
+    return set;
+  }
+  function makeItem(q) {
+    var order = q.type === "ox" ? [0, 1] : shuffle([0, 1, 2, 3]);
+    return { q: q, order: order, chosen: null };
+  }
+  function buildRound(list) {
+    if (list) return shuffle(list).map(function (q) { return makeItem(q); });
+    var pool = QUIZ.filter(function (q) { return quiz.scope === "all" || q.art === quiz.scope; });
+    var pri = [];
+    if (quiz.scope === "all") {
+      var asked = askedArticles();
+      pri = shuffle(pool.filter(function (q) { return asked[q.art]; })).slice(0, 3);
+    }
+    var rest = shuffle(pool.filter(function (q) { return pri.indexOf(q) === -1; }));
+    return shuffle(pri.concat(rest).slice(0, QUIZ_N)).map(function (q) { return makeItem(q); });
+  }
+  function optText(item, idx) { return item.q.type === "ox" ? ["O", "X"][idx] : item.q.options[idx]; }
+  function quizEl() { return document.getElementById("quiz"); }
+
+  function renderQuizIntro() {
+    quiz.phase = "intro";
+    var asked = askedArticles();
+    var askedNames = KB.filter(function (e) { return asked[e.id]; }).map(function (e) { return e.no; });
+    var best = store.get(QUIZ_BEST_KEY);
+    var html = '<div class="card quiz-intro"><h2>안전 확인 퀴즈</h2>' +
+      "<p>질문하기에서 쓰는 <b>산업안전보건기준에 관한 규칙 제222~224조</b> 조문으로 만든 문제입니다. 정답과 근거는 모두 조문 문구 그대로이며, 앱이 따로 만든 기준은 없습니다.</p>" +
+      '<p class="label">출제 범위</p><div class="chips">' +
+      QUIZ_SCOPES.map(function (s) {
+        return '<button type="button" class="chip" data-act="scope" data-id="' + s.id + '" aria-pressed="' + (quiz.scope === s.id) + '">' + esc(s.name) + "</button>";
+      }).join("") + "</div>" +
+      (quiz.scope === "all" && askedNames.length ? "<p>질문 기록에 있는 조문(" + esc(askedNames.join(", ")) + ") 문제를 먼저 냅니다.</p>" : "") +
+      (best ? "<p>최고 기록: " + best.n + "문제 중 " + best.c + "문제 정답</p>" : "") +
+      '<div class="quiz-actions"><span class="label" style="margin:0">' + Math.min(QUIZ_N, QUIZ.filter(function (q) { return quiz.scope === "all" || q.art === quiz.scope; }).length) + '문제 · 객관식·O/X</span><button type="button" class="btn-primary" data-act="start">퀴즈 시작</button></div></div>';
+    quizEl().innerHTML = html;
+  }
+
+  function renderQuizQuestion() {
+    quiz.phase = "question";
+    var item = quiz.round[quiz.i];
+    var q = item.q;
+    var kb = kbById(q.art);
+    var done = item.chosen !== null;
+    var total = quiz.round.length;
+    var html = '<div class="card"><div class="quiz-top"><span>문제 ' + (quiz.i + 1) + " / " + total + '</span><span class="badge law">' + esc(kb.no) + "</span></div>" +
+      '<div class="progress" aria-hidden="true"><div style="width:' + ((quiz.i + (done ? 1 : 0)) / total * 100) + '%"></div></div>' +
+      '<p class="quiz-q">' + (q.type === "ox" ? "[O/X] " : "") + esc(q.q) + "</p>" +
+      '<div class="opts' + (q.type === "ox" ? " ox" : "") + '">' +
+      item.order.map(function (idx, n) {
+        var cls = "opt";
+        if (done && idx === q.answer) cls += " correct";
+        else if (done && idx === item.chosen) cls += " wrong";
+        return '<button type="button" class="' + cls + '" data-act="opt" data-idx="' + idx + '"' + (done ? " disabled" : "") + '><span class="k">' + (n + 1) + "</span><span>" + esc(optText(item, idx)) + "</span></button>";
+      }).join("") + "</div>";
+    if (done) {
+      var ok = item.chosen === q.answer;
+      html += '<div class="quiz-fb"><p class="res ' + (ok ? "ok" : "no") + '">' + (ok ? "정답입니다." : "오답입니다. 정답: " + esc(optText(item, q.answer))) + "</p>" +
+        '<div class="quote-label">근거 · ' + esc(kb.article) + " (조문 그대로)</div>" +
+        '<p class="quote">' + esc(q.quote) + "</p>" +
+        '<a href="' + esc(lawUrl(kb.no)) + '" target="_blank" rel="noopener">국가법령정보센터에서 ' + esc(kb.no) + " 보기 ↗</a></div>" +
+        '<div class="quiz-actions"><button type="button" class="btn-ghost" data-act="home">처음으로</button><button type="button" class="btn-ghost" data-act="ask" data-q="' + esc(q.ask) + '">질문하기에서 자세히 보기</button>' +
+        '<button type="button" class="btn-primary" data-act="next">' + (quiz.i + 1 < total ? "다음 문제" : "결과 보기") + "</button></div>";
+    } else {
+      html += '<div class="quiz-actions"><button type="button" class="btn-ghost" data-act="home">처음으로</button></div>';
+    }
+    html += "</div>";
+    quizEl().innerHTML = html;
+  }
+
+  function renderQuizResult() {
+    quiz.phase = "result";
+    var total = quiz.round.length;
+    var correct = quiz.round.filter(function (it) { return it.chosen === it.q.answer; }).length;
+    var best = store.get(QUIZ_BEST_KEY);
+    if (!best || correct / total > best.c / best.n || (correct / total === best.c / best.n && total > best.n)) store.set(QUIZ_BEST_KEY, { c: correct, n: total });
+    var wrong = total - correct;
+    var html = '<div class="card"><p class="label">퀴즈 결과</p>' +
+      '<div class="score-big">' + correct + " / " + total + "</div>" +
+      "<p style=\"margin:0;font-size:14px;color:var(--muted)\">" + total + "문제 중 " + correct + "문제 정답" + (wrong ? "" : " · 모두 맞혔습니다.") + "</p>" +
+      '<ul class="review">' + quiz.round.map(function (it, n) {
+        var ok = it.chosen === it.q.answer;
+        return '<li><span class="mark ' + (ok ? "o" : "x") + '">' + (ok ? "O" : "X") + "</span>" + (n + 1) + ". " + esc(it.q.q) +
+          '<span class="ans">정답: ' + esc(optText(it, it.q.answer)) + (ok ? "" : " · 내 답: " + esc(optText(it, it.chosen))) + " · 근거: " + esc(kbById(it.q.art).no) + "</span></li>";
+      }).join("") + "</ul>" +
+      '<p class="ck-note">퀴즈는 조문 내용을 확인하는 용도입니다. 현장 적용은 안전관리자에게 확인하세요.</p>' +
+      '<div class="quiz-actions"><button type="button" class="btn-ghost" data-act="home">처음으로</button>' +
+      (wrong ? '<button type="button" class="btn-ghost" data-act="retry-wrong">틀린 문제만 다시</button>' : "") +
+      '<button type="button" class="btn-primary" data-act="start">새 문제로 다시 풀기</button></div></div>';
+    quizEl().innerHTML = html;
+  }
+
+  function quizTop() { window.scrollTo({ top: 0, behavior: "smooth" }); }
+  quizEl().addEventListener("click", function (e) {
+    var b = e.target.closest("[data-act]");
+    if (!b || b.disabled) return;
+    var act = b.getAttribute("data-act");
+    if (act === "scope") { quiz.scope = b.getAttribute("data-id"); renderQuizIntro(); }
+    else if (act === "start") { quiz.round = buildRound(); quiz.i = 0; renderQuizQuestion(); quizTop(); }
+    else if (act === "retry-wrong") {
+      quiz.round = buildRound(quiz.round.filter(function (it) { return it.chosen !== it.q.answer; }).map(function (it) { return it.q; }));
+      quiz.i = 0; renderQuizQuestion(); quizTop();
+    }
+    else if (act === "opt") { quiz.round[quiz.i].chosen = Number(b.getAttribute("data-idx")); renderQuizQuestion(); }
+    else if (act === "next") {
+      if (quiz.i + 1 < quiz.round.length) { quiz.i++; renderQuizQuestion(); } else renderQuizResult();
+      quizTop();
+    }
+    else if (act === "home") { quiz.round = []; renderQuizIntro(); quizTop(); }
+    else if (act === "ask") { showTab("qa"); ask(b.getAttribute("data-q")); }
+  });
+
+  // ───────────────── 탭 ─────────────────
+  var TABS = ["qa", "check", "quiz"];
+  function showTab(which) {
+    TABS.forEach(function (k) {
+      document.getElementById("tab-" + k).setAttribute("aria-selected", k === which);
+      document.getElementById("view-" + k).classList.toggle("hidden", k !== which);
+    });
+    document.getElementById("composer").classList.toggle("hidden", which !== "qa");
+    if (which === "check") { state.czone = state.zone; state.ctask = state.task; renderChips("czone"); renderChips("ctask"); renderChecklist(); }
+    if (which === "quiz" && quiz.phase === "intro") renderQuizIntro(); // 풀던 문제는 유지, 시작 화면은 질문 기록 반영해 갱신
+  }
+  TABS.forEach(function (k) {
+    document.getElementById("tab-" + k).addEventListener("click", function () { showTab(k); });
+  });
 
   // ───────────────── 공지사항 ─────────────────
   var NOTICE_KEY = "safecheck:notice-seen";
