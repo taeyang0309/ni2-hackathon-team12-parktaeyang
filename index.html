@@ -6,6 +6,7 @@
 <meta name="description" content="세이프체크: 로봇 작업구역 안전수칙을 근거 조항과 함께 알려주는 Q&A 시제품">
 <meta name="theme-color" content="#1f2a44">
 <title>세이프체크</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f5b301'/%3E%3Cpath d='M8 17l5 5 11-12' fill='none' stroke='%231b1f27' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #f4f5f7;
@@ -177,6 +178,7 @@
     flex: 1; resize: none; border: 1px solid var(--line); border-radius: 12px;
     background: var(--bg); padding: 10px 12px; min-height: 46px; max-height: 120px;
     font-size: 16px; /* iOS 확대 방지 */
+    overflow-y: hidden; /* 한 줄일 때 스크롤바 숨김 (120px 넘으면 JS에서 auto) */
   }
   .send {
     flex: none; border: 0; border-radius: 12px; background: var(--accent); color: #1b1f27;
@@ -270,7 +272,7 @@
   <div class="composer-inner">
     <form id="ask-form" autocomplete="off">
       <label for="q" class="hidden">질문 입력</label>
-      <textarea id="q" rows="1" placeholder="예: 로봇 셀 안에서 청소해도 되나요?" maxlength="300"></textarea>
+      <textarea id="q" rows="1" placeholder="질문을 입력하세요" maxlength="300"></textarea>
       <button class="send" type="submit">전송</button>
     </form>
     <small>이 답변은 등록된 문서 기준입니다. 문서에 없는 내용은 추측하지 않습니다.</small>
@@ -365,6 +367,7 @@
     {
       id: "u-contact",
       keywords: { "연락처": 3, "전화": 3, "번호": 2, "누구": 2, "담당자": 2, "관리자": 1 },
+      ignore: ["안전화"], // "안전화" 안의 "전화"가 연락처 질문으로 잘못 잡히지 않게
       topic: "비상 연락처와 담당자",
       reason: "등록된 문서에 비상 연락처와 구역별 담당자 정보가 없습니다."
     },
@@ -456,9 +459,16 @@
     });
   }
   function norm(s) { return s.toLowerCase().replace(/\s+/g, ""); }
+  // 받침 유무에 따라 은/는 선택
+  function topicJosa(word) {
+    var c = word.charCodeAt(word.length - 1) - 0xac00;
+    if (c < 0 || c > 11171) return "은(는)";
+    return c % 28 ? "은" : "는";
+  }
   function nameOf(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i].name; return ""; }
   function score(entry, text) {
     var s = 0;
+    (entry.ignore || []).forEach(function (w) { text = text.split(w).join(" "); });
     for (var k in entry.keywords) if (text.indexOf(k) !== -1) s += entry.keywords[k];
     return s;
   }
@@ -536,7 +546,7 @@
       }
     } else {
       var u = res.unknowns[0];
-      html += '<p class="conclusion">' + (u ? esc(u.topic) + "은(는) 등록된 문서에 근거가 없어 답할 수 없습니다." : "등록된 문서에서 이 질문의 근거를 찾지 못했습니다.") + "</p>";
+      html += '<p class="conclusion">' + (u ? esc(u.topic) + topicJosa(u.topic) + " 등록된 문서에 근거가 없어 답할 수 없습니다." : "등록된 문서에서 이 질문의 근거를 찾지 못했습니다.") + "</p>";
       html += '<div class="need-box"><span class="badge need">확인 필요</span>';
       if (res.unknowns.length) {
         res.unknowns.forEach(function (x) { html += "<p>" + esc(x.reason) + "</p>"; });
@@ -592,6 +602,7 @@
     ask(qInput.value);
     qInput.value = "";
     qInput.style.height = "";
+    qInput.style.overflowY = "";
   });
   qInput.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit")); }
@@ -599,6 +610,7 @@
   qInput.addEventListener("input", function () {
     qInput.style.height = "";
     qInput.style.height = Math.min(qInput.scrollHeight, 120) + "px";
+    qInput.style.overflowY = qInput.scrollHeight > 120 ? "auto" : "hidden";
   });
 
   document.getElementById("examples").innerHTML = EXAMPLES.map(function (q) {
